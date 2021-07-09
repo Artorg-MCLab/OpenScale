@@ -63,13 +63,13 @@ void toggleLED()
 void set_default_settings(void)
 {
   //Reset UART to 9600bps
-  setting_uart_speed = 9600;
+  setting_uart_speed = 1000000;
 
   //Reset to pounds as our unit of measure
-  setting_units = UNITS_LBS;
+  setting_units = UNITS_KG;
 
   //Reset report rate to 2Hz
-  setting_report_rate = 500;
+  setting_report_rate = 12500;
 
   //Reset calibration factor
   setting_calibration_factor = 1000;
@@ -78,16 +78,16 @@ void set_default_settings(void)
   setting_tare_point = 0;
 
   //Reset time stamp
-  setting_timestamp_enable = true;
+  setting_timestamp_enable = false;
 
   //Reset decimals
-  setting_decimal_places = 2;
+  setting_decimal_places = 4;
 
   //Reset average amount
-  setting_average_amount = 4;
+  setting_average_amount = 1;
 
   //Reset local temp
-  setting_local_temp_enable = true;
+  setting_local_temp_enable = false;
 
   //Reset remote temp
   setting_remote_temp_enable = false;

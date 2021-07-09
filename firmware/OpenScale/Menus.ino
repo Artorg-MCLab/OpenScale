@@ -445,7 +445,7 @@ void baud_setup(void)
 void rate_setup(void)
 {
   //Calculate the minimum time between reports
-  int minTime = calcMinimumReadTime();
+  unsigned long minTime = calcMinimumReadTime();
 
   Serial.println(F("\n\n\rSet time between reports"));
 
@@ -486,16 +486,16 @@ void rate_setup(void)
 //Takes into account current baud rate
 //Takes into account the time to read various sensors
 //Takes into account raw reading printing
-int calcMinimumReadTime(void)
+unsigned long calcMinimumReadTime(void)
 {
   //The first few reads take too little time
   scale.get_units();
   scale.get_units();
 
   //Establish out much time it takes to do a standard scale read
-  long startTime = millis();
+  long startTime = micros();
   scale.get_units(setting_average_amount); //Do a dummy read and time it
-  int averageReadTime = ceil((millis() - startTime));
+  int averageReadTime = ceil((micros() - startTime));
   int sensorReadTime = averageReadTime;
 
   //Assume we will need to print a minimum of 7 characters at this baud rate per loop
@@ -510,10 +510,10 @@ int calcMinimumReadTime(void)
   if (setting_local_temp_enable)
   {
     //Establish how much time it takes to do a local temp read
-    long startTime = millis();
+    long startTime = micros();
     for (byte x = 0 ; x < 8 ; x++)
       getLocalTemperature(); //Do a dummy read and time it
-    averageReadTime = ceil((millis() - startTime) / (float)8);
+    averageReadTime = ceil((micros() - startTime) / (float)8);
     sensorReadTime += averageReadTime; //In ms
 
     characters += strlen("24.75,"); //Add the time it takes to print the characters as well
@@ -522,10 +522,10 @@ int calcMinimumReadTime(void)
   if (setting_remote_temp_enable)
   {
     //Establish how much time it takes to do a remote temp read
-    long startTime = millis();
+    long startTime = micros();
     for (byte x = 0 ; x < 8 ; x++)
       getRemoteTemperature(); //Do a dummy read and time it
-    averageReadTime = ceil((millis() - startTime) / (float)8);
+    averageReadTime = ceil((micros() - startTime) / (float)8);
     sensorReadTime += averageReadTime; //In ms
 
     characters += strlen("27.81,"); //Add the time it takes to print the characters as well
@@ -535,17 +535,17 @@ int calcMinimumReadTime(void)
 
   if (setting_decimal_places > 0) characters += setting_decimal_places + 1; //For example 4: 3 decimal places and the '.'
 
-  if (setting_units == UNITS_LBS) characters += strlen("lbs");
-  if (setting_units == UNITS_KG) characters += strlen("kg");
+//  if (setting_units == UNITS_LBS) characters += strlen("lbs");
+//  if (setting_units == UNITS_KG) characters += strlen("kg");
 
   if (setting_raw_reading_enable == true)
   {
     long rawReading = scale.read_average(setting_average_amount); //Take average reading over a given number of times
 
     //Establish how much time it takes to do a raw read
-    long startTime = millis();
+    long startTime = micros();
     scale.read_average(setting_average_amount); //Do a dummy read and time it
-    averageReadTime = ceil((millis() - startTime));
+    averageReadTime = ceil((micros() - startTime));
     sensorReadTime += averageReadTime; //In ms
 
     characters += strlen("8355808");

@@ -57,6 +57,9 @@
   * Fixed a bug with the EEPROM defaulting to the wrong values
 */
 
+// ADDED:
+constexpr unsigned long UPDATE_PERIOD = 12500; //[us] --> 80Hz
+
 #include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
 #include "openscale.h" //Contains EPPROM locations for settings
 #include <Wire.h> //Needed to talk to on board TMP102 temp sensor
@@ -72,7 +75,7 @@
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 long setting_uart_speed; //This is the baud rate that the system runs at, default is 9600. Can be 1,200 to 1,000,000
 byte setting_units; //Lbs or kg?
-unsigned int setting_report_rate;
+unsigned long setting_report_rate;
 long setting_calibration_factor; //Value used to convert the load cell reading to lbs or kg
 long setting_tare_point; //Zero value that is found when scale is tared
 boolean setting_timestamp_enable; //Prints the number of miliseconds since boot next to weight reading
@@ -137,7 +140,7 @@ void setup()
   scale.set_offset(setting_tare_point);
 
   //Calculate the minimum time between reports
-  int minTime = calcMinimumReadTime();
+  unsigned long minTime = calcMinimumReadTime();
   Serial.print(F("Minimum time between reports: "));
   Serial.println(minTime);
 
@@ -156,7 +159,7 @@ void setup()
 void loop()
 {
 
-  long startTime = millis();
+  long startTime = micros();
 
   //Take average of readings with calibration and tare taken into account
   float currentReading = scale.get_units(setting_average_amount);
@@ -170,10 +173,10 @@ void loop()
 
   //Print calibrated reading
   Serial.print(currentReading, setting_decimal_places);
-  Serial.print(F(","));
-  if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
-  if (setting_units == UNITS_KG) Serial.print(F("kg"));
-  Serial.print(F(","));
+//  Serial.print(F(","));
+//  if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
+//  if (setting_units == UNITS_KG) Serial.print(F("kg"));
+//  Serial.print(F(","));
 
   //Print raw reading
   if (setting_raw_reading_enable == true)
@@ -228,7 +231,7 @@ void loop()
       }
     }
 
-    if ((millis() - startTime) >= setting_report_rate) break;
+    if ((micros() - startTime) >= UPDATE_PERIOD) break;
   }
 
   //If we are serially triggered then wait for incoming character
